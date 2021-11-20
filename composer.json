@@ -1,0 +1,27 @@
+{
+    "name": "byte-artist/menu-bundle",
+    "description": "Provides a configurable menu for frontend application",
+    "keywords": ["menu", "generator", "navigation"],
+    "type": "symfony-bundle",
+    "require": {
+        "php": ">=7.4",
+        "symfony/framework-bundle": "^5.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "ByteArtist\\MenuBundle\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "ByteArtist\\MenuBundle\\Test": "tests/"
+        }
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Andreas Kempe",
+            "email": "andreas.kempe@byte-artist.de"
+        }
+    ]
+}

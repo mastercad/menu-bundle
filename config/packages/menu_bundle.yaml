@@ -1,0 +1,34 @@
+menu_bundle:
+  label_admin:
+    css_class: 'test'
+    path: ''
+    children:
+      label_musles:
+        css_class: 'test1'
+        path: ''
+      label_muscle_groups:
+        css_class: 'test2'
+        path: ''
+      label_devices:
+        css_class: 'test1'
+        path: ''
+      label_device_groups:
+        css_class: 'test1'
+        path: ''
+      label_device_group_options:
+        css_class: 'test1'
+        path: ''
+      label_exercise_options:
+        css_class: 'test2'
+        path: ''
+      label_permissions:
+        css_class: 'test2'
+        path: ''
+  label_exercises:
+    css_class: ''
+    path: ''
+    children:
+    label_overview:
+      path: ''
+      label_new:
+        path: ''
