@@ -2,6 +2,7 @@
 
 namespace ByteArtist\MenuBundle\DependencyInjection;
 
+use Symfony\Bundle\FrameworkBundle\DependencyInjection\Configuration;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
@@ -11,8 +12,12 @@ class MenuBundleExtension extends Extension
 {
     function load(array $configs, ContainerBuilder $containerBuilder)
     {
-        $loader = new YamlFileLoader($container, new FileLocator(__DIR__.'/../../config'));
+        $loader = new YamlFileLoader($containerBuilder, new FileLocator(__DIR__.'/../../config'));
         $loader->load('services.yaml');
+        
+        $configuration = new Configuration();
+    
+        $config = $this->processConfiguration($configuration, $configs);
         
       // Load the bundle's service declarations 
 #      $loader = new YamlFileLoader($containerBuilder, $configDir);
