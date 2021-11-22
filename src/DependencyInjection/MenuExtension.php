@@ -5,17 +5,17 @@ namespace ByteArtist\MenuBundle\DependencyInjection;
 use Symfony\Bundle\FrameworkBundle\DependencyInjection\Configuration;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
+use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
 class MenuExtension extends Extension
 {
-    function load(array $configs, ContainerBuilder $containerBuilder)
+    public function load(array $configs, ContainerBuilder $containerBuilder)
     {
         $loader = new YamlFileLoader($containerBuilder, new FileLocator(__DIR__.'/../../config'));
         $loader->load('services.yaml');
         
-        $configuration = new Configuration();
+        $configuration = new Configuration($_ENV['APP_DEBUG']);
     
         $config = $this->processConfiguration($configuration, $configs);
         
@@ -28,8 +28,8 @@ class MenuExtension extends Extension
 #      $repo->replaceArgument(0, $options['storageDir']);
     }
 
-    function getAlias()
-    {
-        return 'menu_bundle';
-    }
+#    public function getAlias()
+#    {
+#        return 'menu_bundle';
+#    }
 }
