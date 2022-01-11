@@ -1,0 +1,21 @@
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    ByteArtist\MenuBundle\:
+        resource: '../../*'
+        exclude: '../../{DependencyInjection,Entity,Tests,Kernel.php}'
+
+#    service.menu:
+#        class: ByteArtist\MenuBundle\Service\Menu
+#        arguments:
+#            $navigationTree: '%menu.tree%'
+
+#    ByteArtist\MenuBundle\Service\Menu: '@service.menu'
+
+    ByteArtist\MenuBundle\Twig\MenuExtension:
+        class: ByteArtist\MenuBundle\Twig\MenuExtension
+        arguments:
+            $menuTree: '%menu.tree%'

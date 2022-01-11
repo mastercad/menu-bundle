@@ -1,1 +1,7 @@
+.vscode
+coverage
+coverageCache
+.composer.lock
 vendor
+log
+.php-cs-fixer.cache

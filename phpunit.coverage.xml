@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.0/phpunit.xsd"
+         executionOrder="depends,defects"
+         beStrictAboutOutputDuringTests="true"
+         colors="true"
+         verbose="true"
+         forceCoversAnnotation="false"
+         cacheResult="false"
+         >
+
+    <coverage cacheDirectory="coverageCache"
+          includeUncoveredFiles="true"
+          processUncoveredFiles="true"
+          pathCoverage="true"
+          ignoreDeprecatedCodeUnits="true"
+          disableCodeCoverageIgnore="true">
+
+        <include>
+            <directory suffix=".php">src</directory>
+        </include>
+<!--
+        <exclude>
+            <directory suffix=".php">src/generated</directory>
+            <file>src/autoload.php</file>
+        </exclude>
+-->
+        <report>
+            <clover outputFile="coverage/clover.xml"/>
+            <cobertura outputFile="coverage/cobertura.xml"/>
+            <crap4j outputFile="coverage/crap4j.xml" threshold="50"/>
+            <html outputDirectory="coverage/html-coverage" lowUpperBound="50" highLowerBound="90"/>
+            <php outputFile="coverage/coverage.php"/>
+            <text outputFile="coverage/coverage.txt" showUncoveredFiles="false" showOnlySummary="true"/>
+            <xml outputDirectory="coverage/xml-coverage"/>
+        </report>
+    </coverage>
+
+    <testsuites>
+        <testsuite name="default">
+            <directory>tests</directory>
+        </testsuite>
+        <testsuite name="Functional tests">
+            <directory>tests/integration</directory>
+        </testsuite>
+        <testsuite name="Unit tests">
+            <directory>tests/unit</directory>
+        </testsuite>
+    </testsuites>
+
+    <logging>
+        <junit outputFile="log/junit.xml"/>
+        <teamcity outputFile="log/teamcity.txt"/>
+        <testdoxHtml outputFile="log/testdox.html"/>
+        <testdoxText outputFile="log/testdox.txt"/>
+        <testdoxXml outputFile="log/testdox.xml"/>
+        <text outputFile="log/logfile.txt"/>
+    </logging>
+
+    <php>
+        <ini name="serialize_precision" value="14"/>
+        <server name="KERNEL_CLASS" value="ByteArtist\MenuBundle\Test\Integration\Kernel" />
+    </php>
+</phpunit>

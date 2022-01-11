@@ -1,0 +1,6 @@
+menu:
+    type: default # bootstrap, default, list, div (list is default)
+#    pages:
+#        label_trans_token:
+#            path: existing_route_name
+#            pages: (optional sub pages)
