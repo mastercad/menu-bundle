@@ -17,8 +17,10 @@ use ByteArtist\MenuBundle\Factory\MenuFactory;
 use ByteArtist\MenuBundle\Generator\BootstrapGenerator;
 use ByteArtist\MenuBundle\Generator\DivGenerator;
 use ByteArtist\MenuBundle\Generator\ListGenerator;
+use ByteArtist\MenuBundle\Provider\RouteProvider;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
@@ -31,9 +33,20 @@ final class MenuFactoryTest extends TestCase
     protected function setUp(): void
     {
         $translatorMock = $this->createMock(TranslatorInterface::class);
-        $routerMock = $this->createMock(RouterInterface::class);
+        $routeProviderMock = $this->createMock(RouteProvider::class);
 
-        $this->menuFactory = new MenuFactory($translatorMock, $routerMock);
+        $requestMock = $this->createMock(Request::class);
+        $requestMock->method('get')
+            ->with('_route')
+            ->willReturn('route_test')
+        ;
+
+        $requestStackMock = $this->createMock(RequestStack::class);
+        $requestStackMock->method('getCurrentRequest')
+            ->willReturn($requestMock)
+        ;
+
+        $this->menuFactory = new MenuFactory($translatorMock, $routeProviderMock, $requestStackMock);
     }
 
     public function testCreateDivGenerator(): void

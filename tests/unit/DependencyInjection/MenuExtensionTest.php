@@ -27,63 +27,57 @@ final class MenuExtensionTest extends TestCase
      */
     private $extension;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
         $this->extension = $this->createExtension();
     }
 
-    public function testGetConfigWithDefaultValues()
+    public function testGetConfigWithDefaultValues(): void
     {
         $container = $this->createContainerBuilder();
         $this->extension->load([], $container);
 
-        $this->assertTrue($container->hasParameter("menu.tree"));
-        $menuTree = $container->getParameter("menu.tree");
-        $this->assertEquals("default", $menuTree["type"]);
+        static::assertTrue($container->hasParameter('menu.tree'));
+        $menuTree = $container->getParameter('menu.tree');
+        static::assertSame('default', $menuTree['type']);
 
         $expected = [];
-        $this->assertArrayHasKey("pages", $menuTree);
-        $this->assertEquals($expected, $menuTree["pages"]);
+        static::assertArrayHasKey('pages', $menuTree);
+        static::assertSame($expected, $menuTree['pages']);
     }
 
-    public function testGetConfigWithOneLayer()
+    public function testGetConfigWithOneLayer(): void
     {
         $configs = [
-            "type"     => "default",
-            "pages" => [
-                "val1" => ["path" => "array_value_1"],
-                "val2" => ["path" => "array_value_2"],
+            'type' => 'default',
+            'pages' => [
+                'val1' => ['path' => 'array_value_1'],
+                'val2' => ['path' => 'array_value_2'],
             ],
         ];
         $container = $this->createContainerBuilder();
         $this->extension->load([$configs], $container);
 
-        $this->assertTrue($container->hasParameter("menu.tree"));
-        $menuTree = $container->getParameter("menu.tree");
-        $this->assertEquals('default', $menuTree["type"]);
+        static::assertTrue($container->hasParameter('menu.tree'));
+        $menuTree = $container->getParameter('menu.tree');
+        static::assertSame('default', $menuTree['type']);
 
         $expected = [
-            "val1" => ["path" => "array_value_1", "pages" => []],
-            "val2" => ["path" => "array_value_2", "pages" => []],
+            'val1' => ['path' => 'array_value_1', 'pages' => []],
+            'val2' => ['path' => 'array_value_2', 'pages' => []],
         ];
 
-        $this->assertArrayHasKey("pages", $menuTree);
-        $this->assertEquals($expected, $menuTree["pages"]);
+        static::assertArrayHasKey('pages', $menuTree);
+        static::assertSame($expected, $menuTree['pages']);
     }
 
-    /**
-     * @return MenuExtension
-     */
     protected function createExtension(): MenuExtension
     {
         return new MenuExtension();
     }
 
-    /**
-     * @return ContainerBuilder
-     */
     private function createContainerBuilder(): ContainerBuilder
     {
         return new ContainerBuilder();

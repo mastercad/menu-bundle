@@ -14,7 +14,8 @@ declare(strict_types=1);
 namespace ByteArtist\MenuBundle\Generator;
 
 use ByteArtist\MenuBundle\Interfaces\MenuGeneratorInterface;
-use Symfony\Component\Routing\RouterInterface;
+use ByteArtist\MenuBundle\Provider\RouteProvider;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
 
@@ -25,15 +26,23 @@ class DivGenerator implements MenuGeneratorInterface
 {
     private TranslatorInterface $translator;
 
-    private RouterInterface $router;
+    private RouteProvider $routeProvider;
+
+    private RequestStack $requestStack;
+
+    private string $route;
+
+    private string $topLevelActiveClass;
 
     /**
      * Div generator CTOR.
      */
-    public function __construct(TranslatorInterface $translator, RouterInterface $router)
+    public function __construct(TranslatorInterface $translator, RouteProvider $routeProvider, RequestStack $requestStack)
     {
         $this->translator = $translator;
-        $this->router = $router;
+        $this->routeProvider = $routeProvider;
+        $this->requestStack = $requestStack;
+        $this->route = $requestStack->getCurrentRequest()->get('_route');
     }
 
     /**
@@ -43,6 +52,7 @@ class DivGenerator implements MenuGeneratorInterface
     {
         $menuContent = '';
         foreach ($menuTree['pages'] as $label => $config) {
+            $this->topLevelActiveClass = '';
             $menuContent .= $this->generateMenuPartContent($environment, $label, $config);
         }
 
@@ -50,8 +60,8 @@ class DivGenerator implements MenuGeneratorInterface
             '@Menu/menu/div/main.html.twig',
             [
                 'menuContent' => $menuContent,
-                'useOriginalCss' => $menuTree['use_orig_css'],
-                'useOriginalJs' => $menuTree['use_orig_js']
+                'useOriginalCss' => $menuTree['use_orig_css'] ?? true,
+                'useOriginalJs' => $menuTree['use_orig_js'] ?? true,
             ]
         );
     }
@@ -64,6 +74,14 @@ class DivGenerator implements MenuGeneratorInterface
         if ('divider' === $label) {
             return '<div class="byte-artist-menu-divider" ></div>';
         }
+
+        $activeClass = '';
+        if (isset($config['path'])
+            && $this->route === $config['path']
+        ) {
+            $activeClass = $this->topLevelActiveClass = 'active';
+        }
+
         if (!\array_key_exists('pages', $config)
             || empty($config['pages'])
         ) {
@@ -71,7 +89,8 @@ class DivGenerator implements MenuGeneratorInterface
                 '@Menu/menu/div/link.html.twig',
                 [
                     'label' => $this->translator->trans($label),
-                    'path' => $config['path'] ? $this->router->generate($config['path']) : '#',
+                    'path' => $this->routeProvider->provide($config['path']),
+                    'activeClass' => $activeClass,
                 ]
             );
         }
@@ -80,7 +99,7 @@ class DivGenerator implements MenuGeneratorInterface
             '@Menu/menu/div/subnav.html.twig',
             [
                 'label' => $this->translator->trans($label),
-                'path' => $config['path'] ? $this->router->generate($config['path']) : '#',
+                'path' => $this->routeProvider->provide($config['path']),
                 'subnavContent' => $this->generateSubMenuContent($environment, $label, $config),
             ]
         );
@@ -89,25 +108,26 @@ class DivGenerator implements MenuGeneratorInterface
     /**
      * Generates content for sub menu by given lave, config and environment.
      */
-    private function generateSubMenuContent(Environment $environment, string $label, array $parentConfig): string
+    private function generateSubMenuContent(Environment $environment, string $parentLabel, array $parentConfig): string
     {
-        $subnavContent = $environment->render(
-            '@Menu/menu/div/button.html.twig',
-            [
-                'label' => $this->translator->trans($label),
-            ]
-        );
-
         $subnavContentContent = '';
         foreach ($parentConfig['pages'] as $label => $config) {
             $subnavContentContent .= $this->generateMenuPartContent($environment, $label, $config);
         }
 
+        $subnavContent = $environment->render(
+            '@Menu/menu/div/button.html.twig',
+            [
+                'label' => $this->translator->trans($parentLabel),
+                'topLevelActiveClass' => $this->topLevelActiveClass,
+            ]
+        );
+
         return $subnavContent.$environment->render(
             '@Menu/menu/div/subnav-content.html.twig',
             [
                 'label' => $this->translator->trans($label),
-                'path' => $config['path'] ?? '#',
+                'path' => $this->routeProvider->provide($config['path']),
                 'subnavContentContent' => $subnavContentContent,
             ]
         );

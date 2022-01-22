@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of Menu Bundle.
  *
@@ -13,37 +15,59 @@ namespace ByteArtist\MenuBundle\Test\Unit\Twig;
 
 use ByteArtist\MenuBundle\Factory\MenuFactory;
 use ByteArtist\MenuBundle\Interfaces\MenuGeneratorInterface;
+use ByteArtist\MenuBundle\Provider\RouteProvider;
 use ByteArtist\MenuBundle\Twig\MenuExtension;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
 use Twig\TwigFunction;
 
+/**
+ * @internal
+ */
 final class MenuExtensionTest extends TestCase
 {
-    public function testGetFunctions()
+    public function testGetFunctions(): void
     {
-        $menuFactory = new MenuFactory($this->createMock(TranslatorInterface::class), $this->createMock(RouterInterface::class));
+        $requestMock = $this->createMock(Request::class);
+        $requestMock->method('get')
+            ->with('_route')
+            ->willReturn('route')
+        ;
+
+        $requestStackMock = $this->createMock(RequestStack::class);
+        $requestStackMock->method('getCurrentRequest')
+            ->willReturn($requestMock)
+        ;
+
+        $menuFactory = new MenuFactory(
+            $this->createMock(TranslatorInterface::class),
+            $this->createMock(RouteProvider::class),
+            $requestStackMock
+        );
 
         $extension = new MenuExtension($menuFactory, []);
 
         $result = $extension->getFunctions();
 
-        self::assertIsArray($result);
-        self::assertArrayHasKey(0, $result);
-        self::assertInstanceOf(TwigFunction::class, $result[0]);
+        static::assertIsArray($result);
+        static::assertArrayHasKey(0, $result);
+        static::assertInstanceOf(TwigFunction::class, $result[0]);
     }
 
-    public function testGenerate()
+    public function testGenerate(): void
     {
         $generatorMock = $this->createMock(MenuGeneratorInterface::class);
         $generatorMock->method('generate')
-            ->willReturn('created');
+            ->willReturn('created')
+        ;
 
         $menuFactoryMock = $this->createMock(MenuFactory::class);
         $menuFactoryMock->method('create')
-            ->willReturn($generatorMock);
+            ->willReturn($generatorMock)
+        ;
 
         $extension = new MenuExtension($menuFactoryMock, []);
         $environmentMock = $this->createMock(Environment::class);

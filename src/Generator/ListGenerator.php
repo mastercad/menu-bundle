@@ -14,7 +14,8 @@ declare(strict_types=1);
 namespace ByteArtist\MenuBundle\Generator;
 
 use ByteArtist\MenuBundle\Interfaces\MenuGeneratorInterface;
-use Symfony\Component\Routing\RouterInterface;
+use ByteArtist\MenuBundle\Provider\RouteProvider;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
 
@@ -25,17 +26,25 @@ class ListGenerator implements MenuGeneratorInterface
 {
     private TranslatorInterface $translator;
 
-    private RouterInterface $router;
+    private RouteProvider $routeProvider;
 
     private Environment $environment;
+
+    private RequestStack $requestStack;
+
+    private string $route;
+
+    private string $topLevelActive;
 
     /**
      * List Generator CTOR.
      */
-    public function __construct(TranslatorInterface $translator, RouterInterface $router)
+    public function __construct(TranslatorInterface $translator, RouteProvider $routeProvider, RequestStack $requestStack)
     {
         $this->translator = $translator;
-        $this->router = $router;
+        $this->routeProvider = $routeProvider;
+        $this->requestStack = $requestStack;
+        $this->route = $requestStack->getCurrentRequest()->get('_route');
     }
 
     /**
@@ -58,6 +67,7 @@ class ListGenerator implements MenuGeneratorInterface
 
         foreach ($pages as $label => $config) {
             if (!$level) {
+                $this->topLevelActive = '';
                 $template = '@Menu/menu/list/main.html.twig';
             }
             $menuContent .= $this->generateMenuPartContent($label, $config, $level);
@@ -67,8 +77,8 @@ class ListGenerator implements MenuGeneratorInterface
             $template,
             [
                 'menuContent' => $menuContent,
-                'useOriginalCss' => $pages['use_orig_css'] ?? false,
-                'useOriginalJs' => $pages['use_orig_js'] ?? false
+                'useOriginalCss' => $pages['use_orig_css'] ?? true,
+                'useOriginalJs' => $pages['use_orig_js'] ?? true,
             ]
         );
     }
@@ -81,18 +91,26 @@ class ListGenerator implements MenuGeneratorInterface
         if ('divider' === $label) {
             return '<hr class="byte-artist-menu-divider" />';
         }
+        $active = '';
+        if (isset($config['path'])
+            && $this->route === $config['path']
+        ) {
+            $active = $this->topLevelActive = 'active';
+        }
         $submenuContent = '';
         if (!empty($config['pages'])
             && \is_array($config['pages'])
         ) {
-            $submenuContent = $this->processPages($config['pages'], ++$level);
+            $submenuContent = $this->processPages($config['pages'], $level + 1);
         }
 
         return $this->environment->render(
             '@Menu/menu/list/link.html.twig',
             [
                 'label' => $this->translator->trans($label),
-                'path' => $config['path'] ? $this->router->generate($config['path']) : '#',
+                'path' => $this->routeProvider->provide($config['path']),
+                'active' => 0 === $level ? '' : $active,
+                'topLevelActive' => 0 === $level ? $this->topLevelActive : '',
                 'submenuContent' => $submenuContent,
             ]
         );

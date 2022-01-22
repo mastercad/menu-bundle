@@ -4,6 +4,7 @@
     "description": "Provides a configurable symfony and twig compatible menu for frontend application",
     "keywords": ["menu", "generator", "navigation"],
     "license": "MIT",
+    "version": 0.1,
     "minimum-stability": "stable",
     "authors": [
         {
@@ -14,11 +15,11 @@
     "require": {
         "php": ">=7.4",
         "symfony/framework-bundle": "^5.2",
-        "symfony/routing": "^5.4",
-        "symfony/translation": "5.4.x-dev",
-        "symfony/twig-bundle": "^5.4",
-        "symfony/yaml": "^5.4",
-        "twig/twig": "3.x-dev"
+        "symfony/routing": "^5",
+        "symfony/translation": "^5",
+        "symfony/twig-bundle": "^5",
+        "symfony/yaml": "^5",
+        "twig/twig": "^3.2"
     },
     "require-dev": {
         "escapestudios/symfony2-coding-standard": "3.x-dev",
@@ -45,6 +46,14 @@
         "psr-4": {
             "ByteArtist\\MenuBundle\\Test\\": "tests/",
             "ByteArtist\\MenuBundle\\Test\\Integration\\": "tests/integration/"
+        }
+    },
+    "extra": {
+        "symfony": {
+            "endpoint": [
+                "https://api.github.com/repos/mastercad/symfony-recipes/contents/index.json",
+                "flex://defaults"
+            ]
         }
     }
 }

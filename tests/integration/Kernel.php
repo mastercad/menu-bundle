@@ -1,5 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
+/*
+ * This file is part of Menu Bundle.
+ *
+ * © Andreas Kempe <andreas.kempe@byte-artist.de>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace ByteArtist\MenuBundle\Test\Integration;
 
 use ByteArtist\MenuBundle\MenuBundle;
@@ -23,7 +34,7 @@ class Kernel extends BaseKernel
         return [
             new FrameworkBundle(),
             new TwigBundle(),
-            new MenuBundle()
+            new MenuBundle(),
         ];
     }
 
@@ -43,24 +54,17 @@ class Kernel extends BaseKernel
         return sys_get_temp_dir().'/MenuBundle/logs';
     }
 
-    /**
-     * @param RouteCollectionBuilder $routes
-     */
-    protected function configureRoutes(RouteCollectionBuilder $routes)
+    protected function configureRoutes(RouteCollectionBuilder $routes): void
     {
         $routes->import('@ByteArtist/Menu/Controller/', '/', 'annotation');
     }
 
-    /**
-     * @param ContainerBuilder $containerBuilder
-     * @param LoaderInterface  $loader
-     */
-    protected function configureContainer(ContainerBuilder $containerBuilder, LoaderInterface $loader)
+    protected function configureContainer(ContainerBuilder $containerBuilder, LoaderInterface $loader): void
     {
         $containerBuilder->loadFromExtension('framework', [
             'secret' => 'my$ecret',
             'test' => null,
-//            'templating' => false,
+            //            'templating' => false,
             'assets' => false,
             'profiler' => [
                 'collect' => false,

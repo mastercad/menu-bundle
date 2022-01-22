@@ -33,12 +33,12 @@
             text-align: left;
         }
         #navbar ul li { float: none; }
-        #navbar li:hover { background-color: #f90; }
-        #navbar ul li:hover { background-color: #666; }
+        #navbar li:hover, #navbar li.active { background-color: #f90; }
+        #navbar ul li:hover, #navbar ul li.active.active { background-color: #666; }
     </style>
     {% endblock %}
 {% endif %}
 
-<ul id="navbar" class="">
+<ul id="navbar">
     {{ menuContent | raw }}
 </ul>

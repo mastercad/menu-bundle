@@ -12,7 +12,7 @@
     <coverage cacheDirectory="coverageCache"
           includeUncoveredFiles="true"
           processUncoveredFiles="true"
-          pathCoverage="true"
+          pathCoverage="false"
           ignoreDeprecatedCodeUnits="true"
           disableCodeCoverageIgnore="true">
 

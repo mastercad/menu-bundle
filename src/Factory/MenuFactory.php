@@ -17,7 +17,8 @@ use ByteArtist\MenuBundle\Generator\BootstrapGenerator;
 use ByteArtist\MenuBundle\Generator\DivGenerator;
 use ByteArtist\MenuBundle\Generator\ListGenerator;
 use ByteArtist\MenuBundle\Interfaces\MenuGeneratorInterface;
-use Symfony\Component\Routing\RouterInterface;
+use ByteArtist\MenuBundle\Provider\RouteProvider;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
@@ -31,15 +32,17 @@ class MenuFactory
     public const MENU_TYPE_DIV = 'div';
 
     private TranslatorInterface $translator;
-    private RouterInterface $router;
+    private RouteProvider $routeProvider;
+    private RequestStack $requestStack;
 
     /**
      * Menu factory CTOR.
      */
-    public function __construct(TranslatorInterface $translator, RouterInterface $router)
+    public function __construct(TranslatorInterface $translator, RouteProvider $routeProvider, RequestStack $requestStack)
     {
         $this->translator = $translator;
-        $this->router = $router;
+        $this->routeProvider = $routeProvider;
+        $this->requestStack = $requestStack;
     }
 
     /**
@@ -49,15 +52,15 @@ class MenuFactory
     {
         switch ($type) {
             case static::MENU_TYPE_BOOTSTRAP:
-                return new BootstrapGenerator($this->translator, $this->router);
+                return new BootstrapGenerator($this->translator, $this->routeProvider, $this->requestStack);
 
             case static::MENU_TYPE_DIV:
-                return new DivGenerator($this->translator, $this->router);
+                return new DivGenerator($this->translator, $this->routeProvider, $this->requestStack);
 
             case static::MENU_TYPE_DEFAULT:
             case static::MENU_TYPE_LIST:
             default:
-                return new ListGenerator($this->translator, $this->router);
+                return new ListGenerator($this->translator, $this->routeProvider, $this->requestStack);
         }
     }
 }

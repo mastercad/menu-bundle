@@ -1,4 +1,4 @@
-<li>
+<li{% if active or topLevelActive %} class="{{ active }}{% if topLevelActive %}{{ topLevelActive }}{% endif %}"{% endif %}>
     <a href="{{ path }}">{{ label }}</a>
     {{ submenuContent | raw }}
 </li>

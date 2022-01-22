@@ -14,7 +14,8 @@ declare(strict_types=1);
 namespace ByteArtist\MenuBundle\Generator;
 
 use ByteArtist\MenuBundle\Interfaces\MenuGeneratorInterface;
-use Symfony\Component\Routing\RouterInterface;
+use ByteArtist\MenuBundle\Provider\RouteProvider;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
 
@@ -25,15 +26,23 @@ class BootstrapGenerator implements MenuGeneratorInterface
 {
     private TranslatorInterface $translator;
 
-    private RouterInterface $router;
+    private RouteProvider $routeProvider;
+
+    private RequestStack $requestStack;
+
+    private string $route;
+
+    private string $topLevelActiveClass;
 
     /**
      * Bootstrap generator CTOR.
      */
-    public function __construct(TranslatorInterface $translator, RouterInterface $router)
+    public function __construct(TranslatorInterface $translator, RouteProvider $routeProvider, RequestStack $requestStack)
     {
         $this->translator = $translator;
-        $this->router = $router;
+        $this->routeProvider = $routeProvider;
+        $this->requestStack = $requestStack;
+        $this->route = $requestStack->getCurrentRequest()->get('_route');
     }
 
     /**
@@ -42,6 +51,7 @@ class BootstrapGenerator implements MenuGeneratorInterface
     public function generate(array $menuTree, Environment $environment): string
     {
         $menuContent = '';
+        $this->topLevelActiveClass = '';
         foreach ($menuTree['pages'] as $label => $config) {
             $menuContent .= $this->generateMenuPartContent($environment, $label, $config);
         }
@@ -51,8 +61,8 @@ class BootstrapGenerator implements MenuGeneratorInterface
             [
                 'menuContent' => $menuContent,
                 'brandName' => $menuTree['brand_name'] ?? '',
-                'useOriginalCss' => $menuTree['use_orig_css'],
-                'useOriginalJs' => $menuTree['use_orig_js']
+                'useOriginalCss' => $menuTree['use_orig_css'] ?? true,
+                'useOriginalJs' => $menuTree['use_orig_js'] ?? true,
             ]
         );
     }
@@ -62,8 +72,17 @@ class BootstrapGenerator implements MenuGeneratorInterface
      */
     private function generateMenuPartContent(Environment $environment, string $label, array $config): string
     {
+        $active = '';
+        $activeClass = '';
+        $this->topLevelActiveClass = '';
         if ('divider' === $label) {
             return '<div class="dropdown-divider"></div>';
+        }
+        if (isset($config['path'])
+            && $this->route === $config['path']
+        ) {
+            $active = '<span class="sr-only">(current)</span>';
+            $activeClass = $this->topLevelActiveClass = 'active';
         }
         if (!\array_key_exists('pages', $config)
             || empty($config['pages'])
@@ -72,7 +91,9 @@ class BootstrapGenerator implements MenuGeneratorInterface
                 '@Menu/menu/bootstrap/link.html.twig',
                 [
                     'label' => $this->translator->trans($label),
-                    'path' => $config['path'] ? $this->router->generate($config['path']) : '#',
+                    'path' => $this->routeProvider->provide($config['path']),
+                    'active' => $active,
+                    'activeClass' => $activeClass,
                 ]
             );
         }
@@ -81,9 +102,10 @@ class BootstrapGenerator implements MenuGeneratorInterface
             '@Menu/menu/bootstrap/subnav.html.twig',
             [
                 'label' => $this->translator->trans($label),
-                'path' => $config['path'] ? $this->router->generate($config['path']) : '#',
+                'path' => $this->routeProvider->provide($config['path']),
                 'dropDownId' => $label.'Id',
                 'subnavContent' => $this->generateSubMenuContent($environment, $label, $config),
+                'topLevelActiveClass' => $this->topLevelActiveClass,
             ]
         );
     }
@@ -95,10 +117,19 @@ class BootstrapGenerator implements MenuGeneratorInterface
     {
         $subnavContentContent = '';
         foreach ($parentConfig['pages'] as $label => $config) {
+            $active = '';
+            $activeClass = '';
+            if (isset($config['path'])
+                && $this->route === $config['path']
+            ) {
+                $active = '<span class="sr-only">(current)</span>';
+                $activeClass = $this->topLevelActiveClass = 'active';
+            }
             if ('divider' === $label) {
                 $subnavContentContent .= '<div class="dropdown-divider"></div>';
             } else {
-                $subnavContentContent .= '<a class="dropdown-item" href="'.($config['path'] ?? '#').'">'.$label.'</a>';
+                $subnavContentContent .= '<a class="dropdown-item '.$activeClass.'" href="'.
+                    $this->routeProvider->provide($config['path']).'">'.$label.' '.$active.'</a>';
             }
         }
 
@@ -106,7 +137,7 @@ class BootstrapGenerator implements MenuGeneratorInterface
             '@Menu/menu/bootstrap/subnav-content.html.twig',
             [
                 'label' => $this->translator->trans($label),
-                'path' => $config['path'] ?? '#',
+                'path' => $this->routeProvider->provide($config['path']),
                 'dropDownId' => $parentLabel.'Id',
                 'subnavContentContent' => $subnavContentContent,
             ]

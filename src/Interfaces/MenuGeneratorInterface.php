@@ -13,7 +13,8 @@ declare(strict_types=1);
 
 namespace ByteArtist\MenuBundle\Interfaces;
 
-use Symfony\Component\Routing\RouterInterface;
+use ByteArtist\MenuBundle\Provider\RouteProvider;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
 
@@ -22,7 +23,7 @@ use Twig\Environment;
  */
 interface MenuGeneratorInterface
 {
-    public function __construct(TranslatorInterface $translator, RouterInterface $router);
+    public function __construct(TranslatorInterface $translator, RouteProvider $routeProvider, RequestStack $requestStack);
 
     public function generate(array $menuTree, Environment $environment);
 }

@@ -1,46 +1,33 @@
 <?php
 
+declare(strict_types=1);
+
+/*
+ * This file is part of Menu Bundle.
+ *
+ * © Andreas Kempe <andreas.kempe@byte-artist.de>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace ByteArtist\MenuBundle\Test\Integration;
 
 use ByteArtist\MenuBundle\Generator\ListGenerator;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Symfony\Component\Routing\RouterInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
-class ListGeneratorTest extends KernelTestCase
+/**
+ * @internal
+ */
+final class ListGeneratorTest extends GeneratorTestAbstract
 {
-    private ListGenerator $generator;
+    protected string $generatorTestClass = ListGenerator::class;
 
-    public function setUp(): void
-    {
-        $translatorMock = $this->createMock(TranslatorInterface::class);
-
-        $closureTranslator = function($arg) {
-            return 'trans_'.$arg;
-        };
-
-        $translatorMock->method('trans')
-            ->willReturnCallback($closureTranslator);
-
-        $routerMock = $this->createMock(RouterInterface::class);
-
-        $closureRouter = function($arg) {
-            return 'route_'.$arg;
-        };
-
-        $routerMock->method('generate')
-            ->willReturnCallback($closureRouter);
-
-        static::bootKernel();
-        $this->generator = new ListGenerator($translatorMock, $routerMock);
-    }
-
-    public function testMenuWithoutPages()
+    public function testMenuWithoutPages(): void
     {
         $menuTree = ['pages' => []];
-        $result = str_replace('\n', '', $this->generator->generate($menuTree, self::$kernel->getContainer()->get('twig')));
+        $result = str_replace('\n', '', $this->generateGenerator('')->generate($menuTree, self::$kernel->getContainer()->get('twig')));
 
-        $this->assertMatchesRegularExpression(
+        static::assertMatchesRegularExpression(
             '/<ul class="subnav">\s*<\/ul>/',
             $result
         );
@@ -51,18 +38,18 @@ class ListGeneratorTest extends KernelTestCase
         $menuTree = [
             'pages' => [
                 'home' => [
-                    'path' => '#'
+                    'path' => '#',
                 ],
                 'contact' => [
                     'path' => 'my_path',
-                    'pages' => []
-                ]
-            ]
+                    'pages' => [],
+                ],
+            ],
         ];
-        $result = preg_replace('/\\n/', '', $this->generator->generate($menuTree, self::$kernel->getContainer()->get('twig')));
+        $result = preg_replace('/\\n/', '', $this->generateGenerator('')->generate($menuTree, self::$kernel->getContainer()->get('twig')));
 
-        $this->assertMatchesRegularExpression(
-            '/<ul id="navbar" class="">\s*'.
+        static::assertMatchesRegularExpression(
+            '/<ul id="navbar">\s*'.
             '<li>\s*'.
             '<a href="route_#">trans_home<\/a>\s*'.
             '<\/li><li>\s*'.
@@ -72,46 +59,46 @@ class ListGeneratorTest extends KernelTestCase
         );
     }
 
-    public function testGenerateMenuWithSubmenuBrandAndDivider()
+    public function testGenerateMenuWithSubmenuBrandAndDivider(): void
     {
         $menuTree = [
             'brand_name' => 'brand',
             'pages' => [
                 'home' => [
-                    'path' => '#'
+                    'path' => '#',
                 ],
                 'admin' => [
                     'path' => 'admin_index',
                     'pages' => [
                         'admin_user_create' => [
-                            'path' => 'user_create'
+                            'path' => 'user_create',
                         ],
                         'admin_user_edit' => [
-                            'path' => 'user_edit'
+                            'path' => 'user_edit',
                         ],
                         'divider' => [],
                         'admin_page_create' => [
-                            'path' => 'page_create'
-                        ]
-                    ]
+                            'path' => 'page_create',
+                        ],
+                    ],
                 ],
                 'contact' => [
                     'path' => 'my_path',
-                    'pages' => []
-                ]
-            ]
+                    'pages' => [],
+                ],
+            ],
         ];
-        $result = str_replace('\n', '', $this->generator->generate($menuTree, self::$kernel->getContainer()->get('twig')));
+        $result = str_replace('\n', '', $this->generateGenerator('user_create')->generate($menuTree, self::$kernel->getContainer()->get('twig')));
 
-        $this->assertMatchesRegularExpression(
-            '/<ul id="navbar" class="">\s*'.
+        static::assertMatchesRegularExpression(
+            '/<ul id="navbar">\s*'.
             '<li>\s*'.
             '<a href="route_#">trans_home<\/a>\s*'.
             '<\/li>\s*'.
-            '<li>\s*'.
+            '<li class="active">\s*'.
             '<a href="route_admin_index">trans_admin<\/a>\s*'.
             '<ul class="subnav">\s*'.
-            '<li>\s*'.
+            '<li class="active">\s*'.
             '<a href="route_user_create">trans_admin_user_create<\/a>\s*'.
             '<\/li>\s*'.
             '<li>\s*'.
@@ -130,7 +117,7 @@ class ListGeneratorTest extends KernelTestCase
         );
     }
 
-    public function testGenerateMultipleSubMenus()
+    public function testGenerateMultipleSubMenus(): void
     {
         $menuTree = [
             'pages' => [
@@ -145,25 +132,25 @@ class ListGeneratorTest extends KernelTestCase
                                     'pages' => [
                                         'user_create' => [
                                             'path' => 'user_create',
-                                            'pages' => []
+                                            'pages' => [],
                                         ],
                                         'user_edit' => [
                                             'path' => 'user_edit',
-                                            'pages' => []
-                                        ]
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
+                                            'pages' => [],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
         ];
-        $result = str_replace('\n', '', $this->generator->generate($menuTree, self::$kernel->getContainer()->get('twig')));
+        $result = str_replace('\n', '', $this->generateGenerator('user_create')->generate($menuTree, self::$kernel->getContainer()->get('twig')));
 
-        $this->assertMatchesRegularExpression(
-            '/<ul id="navbar" class="">\s*'.
-            '<li>\s*'.
+        static::assertMatchesRegularExpression(
+            '/<ul id="navbar">\s*'.
+            '<li class="active">\s*'.
             '<a href="route_home_index">trans_home<\/a>\s*'.
             '<ul class="subnav">\s*'.
             '<li>\s*'.
@@ -172,7 +159,7 @@ class ListGeneratorTest extends KernelTestCase
             '<li>\s*'.
             '<a href="route_user_index">trans_user<\/a>\s*'.
             '<ul class="subnav">\s*'.
-            '<li>\s*'.
+            '<li class="active">\s*'.
             '<a href="route_user_create">trans_user_create<\/a>\s*'.
             '<\/li>\s*'.
             '<li>\s*'.
@@ -185,6 +172,50 @@ class ListGeneratorTest extends KernelTestCase
             '<\/ul>\s*'.
             '<\/li>\s*'.
             '<\/ul>/',
+            $result
+        );
+    }
+
+    public function testWithCss(): void
+    {
+        $menuTree = [
+            'use_orig_css' => true,
+            'pages' => [
+                'home' => [
+                    'path' => '#',
+                ],
+                'contact' => [
+                    'path' => 'my_path',
+                    'pages' => [],
+                ],
+            ],
+        ];
+        $result = $this->generateGenerator('my_path')->generate($menuTree, self::$kernel->getContainer()->get('twig'));
+
+        static::assertMatchesRegularExpression(
+            '/<style>.*<\/style>/s',
+            $result
+        );
+    }
+
+    public function testWithoutCss(): void
+    {
+        $menuTree = [
+            'use_orig_css' => false,
+            'pages' => [
+                'home' => [
+                    'path' => '#',
+                ],
+                'contact' => [
+                    'path' => 'my_path',
+                    'pages' => [],
+                ],
+            ],
+        ];
+        $result = $this->generateGenerator('my_path')->generate($menuTree, self::$kernel->getContainer()->get('twig'));
+
+        static::assertDoesNotMatchRegularExpression(
+            '/<style>.*<\/style>/',
             $result
         );
     }
