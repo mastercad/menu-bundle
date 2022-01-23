@@ -14,11 +14,11 @@
     ],
     "require": {
         "php": ">=7.4",
-        "symfony/framework-bundle": "^5.2",
-        "symfony/routing": "^5",
-        "symfony/translation": "^5",
-        "symfony/twig-bundle": "^5",
-        "symfony/yaml": "^5",
+        "symfony/framework-bundle": "^5.2|^4.4",
+        "symfony/routing": "^5|^4",
+        "symfony/translation": "^5|^4",
+        "symfony/twig-bundle": "^5|^4",
+        "symfony/yaml": "^5|^4",
         "twig/twig": "^3.2"
     },
     "require-dev": {
@@ -54,9 +54,6 @@
                 "https://api.github.com/repos/mastercad/symfony-recipes/contents/index.json",
                 "flex://defaults"
             ]
-        },
-        "branch-alias": {
-            "dev-master": "0.1-dev"
         }
     }
 }
