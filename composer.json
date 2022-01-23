@@ -15,10 +15,10 @@
     "require": {
         "php": ">=7.4",
         "symfony/framework-bundle": "^5.2|^4.4",
-        "symfony/routing": "^5|^4",
-        "symfony/translation": "^5|^4",
-        "symfony/twig-bundle": "^5|^4",
-        "symfony/yaml": "^5|^4",
+        "symfony/routing": "^5|^4.4",
+        "symfony/translation": "^5|^4.4",
+        "symfony/twig-bundle": "^5|^4.4",
+        "symfony/yaml": "^5|^4.4",
         "twig/twig": "^3.2"
     },
     "require-dev": {

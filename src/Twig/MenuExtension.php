@@ -43,7 +43,10 @@ class MenuExtension extends AbstractExtension
             new TwigFunction(
                 'menu',
                 [$this, 'generate'],
-                ['needs_environment' => true]
+                [
+                    'needs_environment' => true,
+                    'is_safe' => ['html']
+                ]
             ),
         ];
     }
